@@ -18,3 +18,18 @@ resource "kubernetes_secret" "schematic" {
     })
   }
 }
+
+resource "kubernetes_secret" "dca" {
+  metadata {
+    name = "dca-env"
+    namespace="data-curator-app"
+  }
+  data = {
+    "SECRETS_MANAGER_SECRETS" = jsonencode({
+        "DCA_CLIENT_ID"= var.dca_client_id,
+        "DCA_CLIENT_SECRET"= var.dca_client_secret,
+        "DCA_APP_URL"= var.dca_app_url,
+        "DCA_SCHEMATIC_API_TYPE"= var.dca_schematic_api_type
+    })
+  }
+}
