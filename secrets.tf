@@ -1,6 +1,7 @@
 resource "kubernetes_secret" "schematic" {
   metadata {
     name = "schematic-env"
+    namespace="schematic"
   }
   data = {
     "SERVICE_ACCOUNT_CREDS" = jsonencode({

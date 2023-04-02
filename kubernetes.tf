@@ -52,9 +52,16 @@ provider "kubernetes" {
   }
 }
 
+resource "kubernetes_namespace" "schematic" {
+  metadata {
+    name = "schematic"
+  }
+}
+
 resource "kubernetes_deployment" "schematic" {
   metadata {
     name = "scalable-schematic-example"
+    namespace = "schematic"
     labels = {
       App = "ScalableSchematicExample"
     }
@@ -94,10 +101,12 @@ resource "kubernetes_deployment" "schematic" {
             limits = {
               cpu    = "1"
               memory = "512Mi"
+            #   memory = "8G"
             }
             requests = {
               cpu    = "250m"
               memory = "50Mi"
+            #  memory = "4G"
             }
           }
         }
@@ -109,6 +118,7 @@ resource "kubernetes_deployment" "schematic" {
 resource "kubernetes_service" "schematic" {
   metadata {
     name = "schematic-example"
+    namespace="schematic"
   }
   spec {
     selector = {
@@ -126,3 +136,81 @@ resource "kubernetes_service" "schematic" {
 output "lb_ip" {
   value = kubernetes_service.schematic.status.0.load_balancer.0.ingress.0.hostname
 }
+
+# resource "kubernetes_namespace" "data_curator_app" {
+#   metadata {
+#     name = "data_curator_app"
+#   }
+# }
+
+# resource "kubernetes_deployment" "data_curator_app" {
+#   metadata {
+#     name = "scalable-DCA-example"
+#     namespace  = "data_curator_app"
+#     labels = {
+#       App = "ScalableDCAExample"
+#     }
+#   }
+
+#   spec {
+#     replicas = 2
+#     selector {
+#       match_labels = {
+#         App = "ScalableDCAExample"
+#       }
+#     }
+#     template {
+#       metadata {
+#         labels = {
+#           App = "ScalableDCAExample"
+#         }
+#       }
+#       spec {
+#         container {
+#           image = "ghcr.io/sage-bionetworks/data_curator:0.3.10-beta"
+#           name  = "dca"
+
+#           port {
+#             container_port = 3838
+#           }
+#           env {
+#             name = "SERVICE_ACCOUNT_CREDS"
+#             value_from {
+#               secret_key_ref {
+#                 name = "dca-env"
+#                 key = "SERVICE_ACCOUNT_CREDS"
+#               }
+#             }
+#           }
+#           resources {
+#             limits = {
+#               cpu    = "1"
+#               memory = "8G"
+#             }
+#             requests = {
+#               cpu    = "250m"
+#               memory = "4G"
+#             }
+#           }
+#         }
+#       }
+#     }
+#   }
+# }
+
+# resource "kubernetes_service" "data_curator_app" {
+#   metadata {
+#     name = "dca-example"
+#     namespace="data_curator_app"
+#   }
+#   spec {
+#     selector = {
+#       App = kubernetes_deployment.data_curator_app.spec.0.template.0.metadata[0].labels.App
+#     }
+#     port {
+#       port        = 3838
+#       target_port = 3838
+#     }
+#     type = "LoadBalancer"
+#   }
+# }
